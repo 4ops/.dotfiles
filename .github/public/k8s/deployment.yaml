@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-deployment
+  labels:
+    app: example-app
+spec:
+  progressDeadlineSeconds: 300
+  replicas: 3
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      labels:
+        app: example-app
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: nginx
+          image: nginx:latest
+          env:
+            - name: TEST_VAR
+              value: test-value
+          envFrom:
+            - secretRef:
+                name: my-secret-env
+          ports:
+            - name: https
+              containerPort: 8000
+          livenessProbe:
+            timeoutSeconds: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            tcpSocket:
+              port: http
+          readinessProbe:
+            timeoutSeconds: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            httpGet:
+              port: http
+              path: /
+          volumeMounts:
+            - name: certs
+              mountPath: /secrets/tls
+              readOnly: true
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            procMount: Default
+            runAsGroup: 1000
+            runAsUser: 1000
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: example-app
+      volumes:
+        - name: certs
+          secret:
+            secretName: example-app-tls

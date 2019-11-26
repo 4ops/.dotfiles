@@ -1,5 +1,4 @@
 /*
-!/.profile
 !/.bash_aliases
 !/.bash_logout
 !/.bash_profile
@@ -8,8 +7,13 @@
 !/.gitignore
 !/.git-prompt.sh
 !/.gitconfig.example
+!/.profile
+!/.github/
 !/.gnupg/
 !/.kube/
+
+.github/*
+!.github/public/
 
 .config/*
 !.config/Code/User/keybindings.json
