@@ -58,6 +58,10 @@ alias eee='edit-aliases'
 alias edit-aliases='test -f "${__BASH_ALIASES_WIP}" || cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES_WIP}" && $EDITOR "${__BASH_ALIASES_WIP}" && reload-aliases'
 alias save-aliases='source "${__BASH_ALIASES_WIP}" && __ts && cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES}.backup-${TS}" && cp -vf "${__BASH_ALIASES_WIP}" "${__BASH_ALIASES}" && rm -f "${__BASH_ALIASES_WIP}"'
 
+# Home directory .files
+alias enable-dotfiles-git='mv -vf "${HOME}/.git-dotfiles-disabled" "${HOME}/.git" && g'
+alias disable-dotfiles-git='mv -vf "${HOME}/.git" "${HOME}/.git-dotfiles-disabled"'
+
 # Git / TODO: Update license template
 alias mit='wget -q ${__GITHUB_BASE}/LICENSE -O -'
 alias gh='git history'
