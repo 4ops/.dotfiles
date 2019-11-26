@@ -1,6 +1,8 @@
-export __BASH_ALIASES=$HOME/.bash_aliases
-export __BASH_ALIASES_WIP=$HOME/.bash_aliases.wip.sh
-export __GITHUB_BASE=https://raw.githubusercontent.com/4ops/.dotfiles/master/.github/public
+export __BASH_ALIASES="$HOME/.bash_aliases"
+export __BASH_ALIASES_WIP="$HOME/.bash_aliases.wip.sh"
+export __DOTFILES_GIT="$HOME/.git"
+export __DOTFILES_GIT_DISABLED="${__DOTFILES_GIT}-dotfiles-disabled"
+export __GITHUB_BASE="https://raw.githubusercontent.com/4ops/.dotfiles/master/.github/public"
 test -d "${HOME}/.git" && echo .git || true
 test -f "${__BASH_ALIASES_WIP}" && basename "${__BASH_ALIASES_WIP}" || true
 #
@@ -54,14 +56,17 @@ alias kkk='kubectl kustomize'
 # Aliases management
 alias rr='reload-aliases'
 alias reset-aliases='unalias -a'
-alias reload-aliases='test -f "${__BASH_ALIASES_WIP}" && source "${__BASH_ALIASES_WIP}" && echo wip success || source "${__BASH_ALIASES}"'
+alias load-aliases='test -f "${__BASH_ALIASES_WIP}" && source "${__BASH_ALIASES_WIP}" && echo wip success'
+alias reload-aliases='load-aliases || source "${__BASH_ALIASES}"'
 alias eee='edit-aliases'
 alias edit-aliases='test -f "${__BASH_ALIASES_WIP}" || cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES_WIP}" && $EDITOR "${__BASH_ALIASES_WIP}" && reload-aliases'
-alias save-aliases='source "${__BASH_ALIASES_WIP}" && __ts && cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES}.backup-${TS}" && cp -vf "${__BASH_ALIASES_WIP}" "${__BASH_ALIASES}" && rm -f "${__BASH_ALIASES_WIP}" && enable-dotfiles-git && pushd "${HOME}" && aa ; popd'
+alias backup-aliases='__ts && cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES}.backup-${TS}"'
+alias save-aliases='load-aliases && backup-aliases && mv -vf "${__BASH_ALIASES_WIP}" "${__BASH_ALIASES}" && enable-dotfiles-git && cd "${HOME}" && git add "${__BASH_ALIASES}" && g'
+alias publish-aliases='cd "${HOME}" && git commit && gp && disable-dotfiles-git'
 
 # Home directory .files
-alias enable-dotfiles-git='mv -vf "${HOME}/.git-dotfiles-disabled" "${HOME}/.git" && g'
-alias disable-dotfiles-git='mv -vf "${HOME}/.git" "${HOME}/.git-dotfiles-disabled"'
+alias enable-dotfiles-git='test -d "${__DOTFILES_GIT_DISABLED}" || echo no .git disabled dir - not fatal && mv -vf "${__DOTFILES_GIT_DISABLED}" "${__DOTFILES_GIT}" && g'
+alias disable-dotfiles-git='mv -vf "${__DOTFILES_GIT}" "${__DOTFILES_GIT_DISABLED}"'
 
 # Git / TODO: Update license template
 alias mit='wget -q ${__GITHUB_BASE}/LICENSE -O -'
