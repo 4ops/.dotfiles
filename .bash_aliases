@@ -1,6 +1,7 @@
 export __BASH_ALIASES=$HOME/.bash_aliases
 export __BASH_ALIASES_WIP=$HOME/.bash_aliases.wip.sh
 export __GITHUB_BASE=https://raw.githubusercontent.com/4ops/.dotfiles/master/.github/public
+test -d "${HOME}/.git" && echo .git || true
 test -f "${__BASH_ALIASES_WIP}" && basename "${__BASH_ALIASES_WIP}" || true
 #
 if [ "${TERM_PROGRAM}" = "vscode" ]; then
@@ -56,7 +57,7 @@ alias reset-aliases='unalias -a'
 alias reload-aliases='test -f "${__BASH_ALIASES_WIP}" && source "${__BASH_ALIASES_WIP}" && echo wip success || source "${__BASH_ALIASES}"'
 alias eee='edit-aliases'
 alias edit-aliases='test -f "${__BASH_ALIASES_WIP}" || cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES_WIP}" && $EDITOR "${__BASH_ALIASES_WIP}" && reload-aliases'
-alias save-aliases='source "${__BASH_ALIASES_WIP}" && __ts && cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES}.backup-${TS}" && cp -vf "${__BASH_ALIASES_WIP}" "${__BASH_ALIASES}" && rm -f "${__BASH_ALIASES_WIP}"'
+alias save-aliases='source "${__BASH_ALIASES_WIP}" && __ts && cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES}.backup-${TS}" && cp -vf "${__BASH_ALIASES_WIP}" "${__BASH_ALIASES}" && rm -f "${__BASH_ALIASES_WIP}" && enable-dotfiles-git && pushd "${HOME}" && aa ; popd'
 
 # Home directory .files
 alias enable-dotfiles-git='mv -vf "${HOME}/.git-dotfiles-disabled" "${HOME}/.git" && g'
