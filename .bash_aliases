@@ -21,6 +21,8 @@ alias tmp='cd "$( mktemp -d )"'
   alias __ts='export TS="$( date +"%Y%m%d%H%M%S" )"'
 alias backup-dir='__ts ; cp -r "${PWD}" "${PWD}.backup-${TS}" && du -hs "${PWD}" "${PWD}.backup-${TS}" && echo success'
 alias update-all='sudo apt update ; sudo apt upgrade -y ; sudo apt autoremove -y ; sudo apt autoclean -y'
+alias mkpass='export PASSWORD_LENGTH="${PASSWORD_LENGTH:-32}" ; cat /dev/urandom | tr -dc a-zA-Z0-9 | fold -w "${PASSWORD_LENGTH}" | head -n 1'
+alias mkpasslist='export PASSWORD_LENGTH="${PASSWORD_LENGTH:-32}" ; cat /dev/urandom | tr -dc a-zA-Z0-9 | fold -w "${PASSWORD_LENGTH}" | head -n'
 
 # Prettify system tools output
 alias printenv='printenv | sort | grep -v -E "^__\w"'
