@@ -44,6 +44,7 @@ alias pyth='docker run --rm -it python:3.7-alpine'
   alias __docker_env='test -n "${DOCKERFILE}" || export DOCKERFILE=Dockerfile ; test -n "${TAG}" || export TAG="$( basename "$( pwd )" )"'
   alias __docker_args='test -z "${TARGET}" || export DOCKER_ARGS="--target=${TARGET}"'
 alias ddd='__docker_env && __docker_args && __docker_build && __docker_run'
+alias dddwww='__docker_env && __docker_args && __docker_build && docker run --rm -it --publish "127.0.0.1:80:8000" $TAG'
 alias drun='docker run --rm -it'
 
 # Kubernetes / TODO: templating ?
