@@ -58,6 +58,9 @@ alias pod-alpine='kubectl run --rm -it --restart=Never --image=alpine:3.10 sh'
 alias kk='kubectl apply --dry-run -k'
 alias kkk='kubectl kustomize'
 
+# Werf
+alias wb='werf build --stages-storage :local'
+
 # Aliases management
 alias rr='reload-aliases'
 alias reset-aliases='unalias -a'
