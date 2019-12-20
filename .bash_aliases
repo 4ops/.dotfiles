@@ -57,6 +57,7 @@ alias k8s-kustomization='curl -fsSL "${__GITHUB_BASE}/k8s/kustomization.yaml"'
 alias pod-alpine='kubectl run --rm -it --restart=Never --image=alpine:3.10 sh'
 alias kk='kubectl apply --dry-run -k'
 alias kkk='kubectl kustomize'
+alias box='kubectl run --image=busybox --restart="Never" --rm --stdin --tty'
 
 # Werf
 alias wb='werf build --stages-storage :local'
