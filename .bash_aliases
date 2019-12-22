@@ -60,7 +60,9 @@ alias kkk='kubectl kustomize'
 alias box='kubectl run --image=busybox --restart="Never" --rm --stdin --tty'
 
 # Werf
-alias wb='werf build --stages-storage :local'
+  alias __werf_env='export WERF_STAGES_STORAGE=":local"'
+alias wb='__werf_env ; werf build'
+alias wrun='__werf_env ; werf run'
 
 # Aliases management
 alias rr='reload-aliases'
