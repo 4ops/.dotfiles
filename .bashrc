@@ -112,4 +112,4 @@ fi
 
 complete -C /usr/local/bin/terraform terraform
 
-PS1="\n${PS1}"
+PS1="${PS1}"
