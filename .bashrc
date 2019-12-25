@@ -111,3 +111,5 @@ if ! shopt -oq posix; then
 fi
 
 complete -C /usr/local/bin/terraform terraform
+
+PS1="\n${PS1}"
