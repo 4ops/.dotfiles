@@ -106,3 +106,4 @@ alias create-editorconfig='test -r .editorconfig || curl -fsSL "${__GITHUB_BASE}
   alias __git_project_name='test -n "${__GIT_PROJECT_NAME}" || export __GIT_PROJECT_NAME="$( basename "$( pwd )" )"'
 alias create-readme='__git_project_name && test ! -f README.md && echo -e "# ${__GIT_PROJECT_NAME^}" > README.md && export -n __GIT_PROJECT_NAME'
 alias init-repo='__git_root ; git init ; test -r LICENSE || mit > LICENSE ; create-editorconfig ; create-readme ; g'
+alias init-tfmodule='git clone git@github.com:4ops/terraform-module-template.git . && rm -rf .git'
