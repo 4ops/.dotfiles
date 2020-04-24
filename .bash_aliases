@@ -1,109 +1,51 @@
-export __BASH_ALIASES="$HOME/.bash_aliases"
-export __BASH_ALIASES_WIP="$HOME/.bash_aliases.wip.sh"
-export __DOTFILES_GIT="$HOME/.git"
-export __DOTFILES_GIT_DISABLED="${__DOTFILES_GIT}-dotfiles-disabled"
-export __GITHUB_BASE="https://raw.githubusercontent.com/4ops/.dotfiles/master/.github/public"
-test -d "${HOME}/.git" && echo .git || true
-test -f "${__BASH_ALIASES_WIP}" && basename "${__BASH_ALIASES_WIP}" || true
-#
-if [ "${TERM_PROGRAM}" = "vscode" ]; then
-  test -n "${EDITOR}" || export EDITOR="code -w"
-else
-  test -n "${EDITOR}" || export EDITOR=nano
+unalias -a
+
+__aliases_reloaded_at="$(date)"
+
+export EDITOR=${EDITOR:-nano}
+
+if [ "${TERM_PROGRAM:-}" == "vscode" ]; then
+	export EDITOR="code -w"
 fi
 
-# Help
-alias hh='cat "${__BASH_ALIASES}" | grep -E "^alias\b" --color=never | sed -E "s/^alias //"'
-alias hhh='cat "${__BASH_ALIASES}" | grep -E "^$|^# [A-Z]|^alias [a-z.]|^  alias\b" --color=never'
-
-# Utils
-alias tmp='cd "$( mktemp -d )"'
-  alias __ts='export TS="$( date +"%Y%m%d%H%M%S" )"'
-alias backup-dir='__ts ; cp -r "${PWD}" "${PWD}.backup-${TS}" && du -hs "${PWD}" "${PWD}.backup-${TS}" && echo success'
-alias update-all='sudo apt update ; sudo apt upgrade -y ; sudo apt autoremove -y ; sudo apt autoclean -y'
-alias mkpasslist='export PASSWORD_LENGTH="${PASSWORD_LENGTH:-32}" ; cat /dev/urandom | tr -dc a-zA-Z0-9 | fold -w "${PASSWORD_LENGTH}" | head -n'
-alias mkpass='mkpasslist 1'
-alias myip='export MYIP="$( curl -s https://api.ipify.org )" ; echo "$MYIP"'
-
-# Prettify system tools output
+# === Aliases
+#
+# --- Manage aliases
+alias edit-aliases='$EDITOR ~/.bash_aliases && test -z "$(source ~/.bash_aliases)" && source ~/.bash_aliases && echo "$__aliases_reloaded_at"'
+alias list-aliases='cat ~/.bash_aliases | grep -E "^(alias|#)" --color=never | grep -v "alias __" --color=never'
+#
+# --- Common helpers
+alias now='date +"%Y-%m-%d-%H-%M-%S"'
+alias mit='curl -s https://4ops.mit-license.org/license.txt'
+alias myip='export MYIP="$(curl -s https://api.ipify.org)" ; echo "$MYIP"'
 alias printenv='printenv | sort | grep -v -E "^__\w"'
+alias mkpass='export PASSWORD_LENGTH="${PASSWORD_LENGTH:-32}" ; cat /dev/urandom | tr -dc a-zA-Z0-9 | fold -w "${PASSWORD_LENGTH}" | head -n 1'
+#
+# --- Filesystem
 alias ..='cd ..'
 alias ...='cd ../..'
-alias ll='ls -la'
-alias pp='ps -au'
+alias cd..='cd ..'
+alias ll='ls -lA'
+alias df='df -h | grep -E -v "^/dev/loop|^tmpfs|^udev"'
+alias tmp='cd $(mktemp -d)'
+alias backup-dir='export BACKUP_PWD="$(pwd).$(now).backup" && cp -r "$(pwd)" "$BACKUP_PWD" && du -hs "$(pwd)" "$BACKUP_PWD"'
+alias restore-dir='test -n "$BACKUP_PWD" && test -d "$BACKUP_PWD" && export RESTORE_PWD="$(pwd)" && cd /tmp && rm -rf "$RESTORE_PWD" && cp -r "$BACKUP_PWD" "$RESTORE_PWD" && cd "$RESTORE_PWD" && du -hs "$BACKUP_PWD" "$RESTORE_PWD"'
+#
+# --- Other system tools
 alias ppp='ps -auxZ | less'
 alias sss='ss -lntup'
-alias df='df -h | grep -E -v "^/dev/loop|^tmpfs|^udev"'
-alias du='du -h'
-
-# Docker / TODO: useful dockerfiles ?
-alias alpine='docker run --rm -it alpine:3.10'
-alias pyth='docker run --rm -it python:3.7-alpine'
-  alias __docker_run='docker run --rm -it $TAG'
-  alias __docker_build='docker build . -t $TAG -f $DOCKERFILE $DOCKER_ARGS'
-  alias __docker_env='test -n "${DOCKERFILE}" || export DOCKERFILE=Dockerfile ; test -n "${TAG}" || export TAG="$( basename "$( pwd )" )"'
-  alias __docker_args='test -z "${TARGET}" || export DOCKER_ARGS="--target=${TARGET}"'
-alias ddd='__docker_env && __docker_args && __docker_build && __docker_run'
-alias dddwww='__docker_env && __docker_args && __docker_build && docker run --rm -it --publish "127.0.0.1:80:8000" $TAG'
-alias drun='docker run --rm -it'
-
-# Kubernetes / TODO: templating ?
-alias k8s-deployment='curl -fsSL "${__GITHUB_BASE}/k8s/deployment.yaml"'
-alias k8s-service='curl -fsSL "${__GITHUB_BASE}/k8s/service.yaml"'
-alias k8s-endpoints='curl -fsSL "${__GITHUB_BASE}/k8s/endpoints.yaml"'
-alias k8s-ingress='curl -fsSL "${__GITHUB_BASE}/k8s/ingress.yaml"'
-alias k8s-statefulset='curl -fsSL "${__GITHUB_BASE}/k8s/statefulset.yaml"'
-alias k8s-kustomization='curl -fsSL "${__GITHUB_BASE}/k8s/kustomization.yaml"'
-alias pod-alpine='kubectl run --rm -it --restart=Never --image=alpine:3.10 sh'
-alias kk='kubectl apply --dry-run -k'
-alias kkk='kubectl kustomize'
-alias box='kubectl run --image=busybox --restart="Never" --rm --stdin --tty'
-
-# Werf
-  alias __werf_env='export WERF_STAGES_STORAGE=":local"'
-alias wb='__werf_env ; werf build'
-alias wrun='__werf_env ; werf run'
-
-# Aliases management
-alias rr='reload-aliases'
-alias reset-aliases='unalias -a'
-alias load-aliases='test -f "${__BASH_ALIASES_WIP}" && source "${__BASH_ALIASES_WIP}" && echo wip success'
-alias reload-aliases='load-aliases || source "${__BASH_ALIASES}"'
-alias eee='edit-aliases'
-alias edit-aliases='test -f "${__BASH_ALIASES_WIP}" || cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES_WIP}" && $EDITOR "${__BASH_ALIASES_WIP}" && reload-aliases'
-alias backup-aliases='__ts && cp -v "${__BASH_ALIASES}" "${__BASH_ALIASES}.backup-${TS}"'
-alias save-aliases='load-aliases && backup-aliases && mv -vf "${__BASH_ALIASES_WIP}" "${__BASH_ALIASES}" && enable-dotfiles-git && cd "${HOME}" && git add "${__BASH_ALIASES}" && g'
-alias publish-aliases='cd "${HOME}" && git commit && gp && disable-dotfiles-git'
-
-# Home directory .files
-alias enable-dotfiles-git='test -d "${__DOTFILES_GIT_DISABLED}" || echo no .git disabled dir - not fatal && mv -vf "${__DOTFILES_GIT_DISABLED}" "${__DOTFILES_GIT}" && g'
-alias disable-dotfiles-git='mv -vf "${__DOTFILES_GIT}" "${__DOTFILES_GIT_DISABLED}"'
-
-# Git / TODO: Update license template
-alias mit='wget -q ${__GITHUB_BASE}/LICENSE -O -'
-alias gh='git history'
-alias gh3='git history --max-count=3'
-alias gh5='git history --max-count=5'
-alias g='git status --short --branch'
+alias update-all='sudo apt update && sudo apt upgrade -y --no-install-recommends && sudo apt autoremove -y && sudo apt autoclean -y'
+#
+# --- Docker containers
+alias alpine='docker run --rm -it alpine:3.11 ; echo'
+alias bbox='docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" --user "$(id --user)" --rm -it busybox:1.31 sh ; echo'
+alias build-image='export TEST_IMAGE=$(basename $(pwd) | tr [:upper:] [:lower:] | tr -d "_.~@ +") && docker build . --tag $TEST_IMAGE'
+alias test-image='test -n "$TEST_IMAGE" || build-image && docker run --rm -it --publish-all "$TEST_IMAGE"'
+#
+# --- Git
+alias g='git status --short'
 alias gg='git status --long'
-alias ggg='git log --oneline --simplify-by-decoration --reverse --max-count 3'
-  alias __git_back='test -n "${__CWD}" && cd "${__CWD}" && export -n __CWD'
-  alias __git_root='__git_back ; export __CWD="$( pwd )" && git rev-parse --show-toplevel &> /dev/null && cd "$( git rev-parse --show-toplevel )"'
-alias aa='__git_root && git add --all . && __git_back'
-alias ccc='git commit -m'
-alias gu='git pull --rebase'
-alias gr='__git_root && git checkout -- . ; __git_back && git checkout master && git pull --rebase'
-alias grr='git reset --hard --quiet && git clean -df && gr'
-  alias __git_branch='export GIT_CURRENT_BRANCH="$( git branch | grep \* | cut -d " " -f2 )" && test -n "${GIT_CURRENT_BRANCH}"'
-alias gp='__git_branch ; git push || git push --set-upstream origin "${GIT_CURRENT_BRANCH}"'
-  alias __git_author='export GIT_AUTHOR="$( git config --get user.email )" && test -n "${GIT_AUTHOR}"'
-  alias __git_fixup_parent='export GIT_FIXUP_PARENT="$( git log --author="${GIT_AUTHOR}" --grep="^fixup! " --invert-grep --max-count=1 --format=format:%H | grep -v "^gpg" )" && test -n "${GIT_FIXUP_PARENT}"'
-alias fixup='__git_author && __git_fixup_parent && git commit --fixup=${GIT_FIXUP_PARENT}'
-alias fff='__git_root && aa && fixup && gp && __git_back'
-
-# Git repo helpers
-alias create-editorconfig='test -r .editorconfig || curl -fsSL "${__GITHUB_BASE}/.editorconfig" > .editorconfig'
-  alias __git_project_name='test -n "${__GIT_PROJECT_NAME}" || export __GIT_PROJECT_NAME="$( basename "$( pwd )" )"'
-alias create-readme='__git_project_name && test ! -f README.md && echo -e "# ${__GIT_PROJECT_NAME^}" > README.md && export -n __GIT_PROJECT_NAME'
-alias init-repo='__git_root ; git init ; test -r LICENSE || mit > LICENSE ; create-editorconfig ; create-readme ; g'
-alias init-tfmodule='git clone git@github.com:4ops/terraform-module-template.git . && rm -rf .git'
+alias gh='git log --oneline --simplify-by-decoration --reverse'
+alias aa='git rev-parse --show-toplevel > /dev/null && $(cd "$(git rev-parse --show-toplevel)" && git add --all .)'
+alias fixup='git commit --fixup=$(git log --grep="^fixup! " --invert-grep --max-count=1 --format=format:%H | grep -v "^gpg")'
+alias git-create='test -n "$PROJECT_NAME" && mkdir "$PROJECT_NAME" && cd "$PROJECT_NAME" && git clone git@github.com:4ops/template.git . && make init'
