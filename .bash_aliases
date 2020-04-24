@@ -1,17 +1,12 @@
+# shellcheck shell=bash
 unalias -a
 
-__aliases_reloaded_at="$(date)"
-
-export EDITOR=${EDITOR:-nano}
-
-if [ "${TERM_PROGRAM:-}" == "vscode" ]; then
-	export EDITOR="code -w"
-fi
+[ "$TERM_PROGRAM" = "vscode" ] && alias nano="code -w"
 
 # === Aliases
 #
 # --- Manage aliases
-alias edit-aliases='$EDITOR ~/.bash_aliases && test -z "$(source ~/.bash_aliases)" && source ~/.bash_aliases && echo "$__aliases_reloaded_at"'
+alias edit-aliases='nano ~/.bash_aliases && shellcheck ~/.bash_aliases && source ~/.bash_aliases'
 alias list-aliases='cat ~/.bash_aliases | grep -E "^(alias|#)" --color=never | grep -v "alias __" --color=never'
 #
 # --- Common helpers
@@ -39,6 +34,7 @@ alias update-all='sudo apt update && sudo apt upgrade -y --no-install-recommends
 # --- Docker containers
 alias alpine='docker run --rm -it alpine:3.11 ; echo'
 alias bbox='docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" --user "$(id --user)" --rm -it busybox:1.31 sh ; echo'
+alias drun='docker run --rm -it'
 alias build-image='export TEST_IMAGE=$(basename $(pwd) | tr [:upper:] [:lower:] | tr -d "_.~@ +") && docker build . --tag $TEST_IMAGE'
 alias test-image='test -n "$TEST_IMAGE" || build-image && docker run --rm -it --publish-all "$TEST_IMAGE"'
 #

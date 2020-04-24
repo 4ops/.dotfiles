@@ -3,10 +3,6 @@
     name = Anton Kulikov
     email = anton.kulikov@protonmail.com
 
-[branch "master"]
-    remote = origin
-    merge = refs/heads/master
-
 [color]
     branch = always
     diff = always
@@ -66,4 +62,3 @@
 
 [url "git@github.com:"]
     insteadof = github:
-
