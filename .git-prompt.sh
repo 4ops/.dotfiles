@@ -477,7 +477,7 @@ __git_ps1 () {
 			b="${head#ref: }"
 			if [ "$head" = "$b" ]; then
 				detached=yes
-				# shellcheck disable=SC2222
+				# shellcheck disable=SC2221,SC2222
 				b="$(
 				case "${GIT_PS1_DESCRIBE_STYLE-}" in
 				(contains)

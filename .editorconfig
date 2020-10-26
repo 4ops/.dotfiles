@@ -1,13 +1,23 @@
+# EditorConfig is awesome: http://EditorConfig.org
 root = true
 
 [*]
-indent_style = space
-indent_size = 2
 charset = utf-8
-trim_trailing_whitespace = true
-insert_final_newline = true
 end_of_line = lf
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+max_line_length = 150
+trim_trailing_whitespace = true
 
-[*.{gitconfig,bashrc,profile,sh}]
+[*.md]
+max_line_length = 0
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_size = 6
+indent_style = tab
+
+[*.{bashrc,bash_aliases,go,gitconfig,json,profile,sh,ts}]
 indent_size = 4
 indent_style = tab
