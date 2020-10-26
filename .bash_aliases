@@ -14,7 +14,7 @@ ERROR() {
 }
 
 editor() {
-	"${EDITOR:-nano}" "$@"
+	${EDITOR:-nano} "$@"
 }
 
 shellcheck() {
@@ -101,7 +101,7 @@ alias k=kubectl
 complete -F __start_kubectl k
 alias start-minikube='__start_minikube'
 alias new-minikube='minikube delete ; docker rm minikube 2>/dev/null ; start-minikube'
-alias no='kubectl get no --label-columns="tier,node.kubernetes.io/instance-type,topology.kubernetes.io/zone"'
+alias no='kubectl get no --label-columns="tier,node.kubernetes.io/nodename,node.kubernetes.io/instance-type,topology.kubernetes.io/zone"'
 alias pods='kubectl get po --label-columns="app.kubernetes.io/name,app.kubernetes.io/instance,app"'
 alias watch-pods='watch -c -n3 kubectl get po --label-columns="app.kubernetes.io/name,app.kubernetes.io/instance,app"'
 alias deployments='kubectl get deployments --label-columns="app.kubernetes.io/name,app.kubernetes.io/instance,app.kubernetes.io/version,app"'
