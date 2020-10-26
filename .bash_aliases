@@ -25,10 +25,6 @@ shellcheck() {
 }
 
 __start_minikube() {
-	if [ -n "$(docker ps --quiet --filter=name=minikube)" ]; then
-		return 0
-	fi
-
 	if ! minikube start; then
 		ERROR "Failed to start minikube"
 		return 1
@@ -104,7 +100,7 @@ alias test-image='test -n "$TEST_IMAGE" || build-image && docker run --rm -it --
 alias k=kubectl
 complete -F __start_kubectl k
 alias start-minikube='__start_minikube'
-alias new-minikube='minikube delete ; docker rm minikube 2>/dev/null ; sleep 1 && echo ; __start_minikube'
+alias new-minikube='minikube delete ; docker rm minikube 2>/dev/null ; start-minikube'
 alias no='kubectl get no --label-columns="tier,node.kubernetes.io/instance-type,topology.kubernetes.io/zone"'
 alias pods='kubectl get po --label-columns="app.kubernetes.io/name,app.kubernetes.io/instance,app"'
 alias watch-pods='watch -c -n3 kubectl get po --label-columns="app.kubernetes.io/name,app.kubernetes.io/instance,app"'
