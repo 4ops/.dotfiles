@@ -1,4 +1,5 @@
 # bash/zsh git prompt support
+# shellcheck disable=SC2148
 #
 # Copyright (C) 2006,2007 Shawn O. Pearce <spearce@spearce.org>
 # Distributed under the GNU General Public License, version 2.0.
@@ -70,6 +71,15 @@
 # state symbols by setting GIT_PS1_STATESEPARATOR. The default separator
 # is SP.
 #
+# When there is an in-progress operation such as a merge, rebase,
+# revert, cherry-pick, or bisect, the prompt will include information
+# related to the operation, often in the form "|<OPERATION-NAME>".
+#
+# When the repository has a sparse-checkout, a notification of the form
+# "|SPARSE" will be included in the prompt.  This can be shortened to a
+# single '?' character by setting GIT_PS1_COMPRESSSPARSESTATE, or omitted
+# by setting GIT_PS1_OMITSPARSESTATE.
+#
 # By default, __git_ps1 will compare HEAD to your SVN upstream if it can
 # find one, or @{upstream} otherwise.  Once you have set
 # GIT_PS1_SHOWUPSTREAM, you can override it on a per-repository basis by
@@ -101,15 +111,15 @@ printf -v __git_printf_supports_v -- '%s' yes >/dev/null 2>&1
 
 # stores the divergence from upstream in $p
 # used by GIT_PS1_SHOWUPSTREAM
-__git_ps1_show_upstream ()
-{
+__git_ps1_show_upstream () {
 	local key value
 	local svn_remote svn_url_pattern count n
 	local upstream=git legacy="" verbose="" name=""
 
 	svn_remote=()
 	# get some config options from git-config
-	local output="$(git config -z --get-regexp '^(svn-remote\..*\.url|bash\.showupstream)$' 2>/dev/null | tr '\0\n' '\n ')"
+	local output
+	output="$(git config -z --get-regexp '^(svn-remote\..*\.url|bash\.showupstream)$' 2>/dev/null | tr '\0\n' '\n ')"
 	while read -r key value; do
 		case "$key" in
 		bash.showupstream)
@@ -144,8 +154,7 @@ __git_ps1_show_upstream ()
 		# get the upstream from the "git-svn-id: ..." in a commit message
 		# (git-svn uses essentially the same procedure internally)
 		local -a svn_upstream
-		svn_upstream=($(git log --first-parent -1 \
-					--grep="^git-svn-id: \(${svn_url_pattern#??}\)" 2>/dev/null))
+		svn_upstream="($(git log --first-parent -1 --grep="^git-svn-id: \(${svn_url_pattern#??}\)" 2>/dev/null))"
 		if [[ 0 -ne ${#svn_upstream[@]} ]]; then
 			svn_upstream=${svn_upstream[${#svn_upstream[@]} - 2]}
 			svn_upstream=${svn_upstream%@*}
@@ -219,7 +228,7 @@ __git_ps1_show_upstream ()
 		if [[ -n "$count" && -n "$name" ]]; then
 			__git_ps1_upstream_name=$(git rev-parse \
 				--abbrev-ref "$upstream" 2>/dev/null)
-			if [ $pcmode = yes ] && [ $ps1_expanded = yes ]; then
+			if [ "$pcmode" = yes ] && [ "$ps1_expanded" = yes ]; then
 				p="$p \${__git_ps1_upstream_name}"
 			else
 				p="$p ${__git_ps1_upstream_name}"
@@ -235,8 +244,7 @@ __git_ps1_show_upstream ()
 # Helper function that is meant to be called from __git_ps1.  It
 # injects color codes into the appropriate gitstring variables used
 # to build a gitstring.
-__git_ps1_colorize_gitstring ()
-{
+__git_ps1_colorize_gitstring () {
 	if [[ -n ${ZSH_VERSION-} ]]; then
 		local c_red='%F{red}'
 		local c_green='%F{green}'
@@ -255,7 +263,7 @@ __git_ps1_colorize_gitstring ()
 	local flags_color="$c_lblue"
 
 	local branch_color=""
-	if [ $detached = no ]; then
+	if [ "$detached" = no ]; then
 		branch_color="$ok_color"
 	else
 		branch_color="$bad_color"
@@ -281,8 +289,8 @@ __git_ps1_colorize_gitstring ()
 # Helper function to read the first line of a file into a variable.
 # __git_eread requires 2 arguments, the file path and the name of the
 # variable, in that order.
-__git_eread ()
-{
+__git_eread () {
+	# shellcheck disable=SC2162
 	test -r "$1" && IFS=$'\r\n' read "$2" <"$1"
 }
 
@@ -290,8 +298,7 @@ __git_eread ()
 # conflict resolution with 'git commit' in the middle of a sequence of picks or
 # reverts then CHERRY_PICK_HEAD/REVERT_HEAD will not exist so we have to read
 # the todo file.
-__git_sequencer_status ()
-{
+__git_sequencer_status () {
 	local todo
 	if test -f "$g/CHERRY_PICK_HEAD"
 	then
@@ -328,8 +335,7 @@ __git_sequencer_status ()
 # The optional third parameter will be used as printf format string to further
 # customize the output of the git-status string.
 # In this mode you can request colored hints using GIT_PS1_SHOWCOLORHINTS=true
-__git_ps1 ()
-{
+__git_ps1 () {
 	# preserve exit status
 	local exit=$?
 	local pcmode=no
@@ -421,6 +427,13 @@ __git_ps1 ()
 		return $exit
 	fi
 
+	local sparse=""
+	if [ -z "${GIT_PS1_COMPRESSSPARSESTATE}" ] &&
+	   [ -z "${GIT_PS1_OMITSPARSESTATE}" ] &&
+	   [ "$(git config --bool core.sparseCheckout)" = "true" ]; then
+		sparse="|SPARSE"
+	fi
+
 	local r=""
 	local b=""
 	local step=""
@@ -464,6 +477,7 @@ __git_ps1 ()
 			b="${head#ref: }"
 			if [ "$head" = "$b" ]; then
 				detached=yes
+				# shellcheck disable=SC2222
 				b="$(
 				case "${GIT_PS1_DESCRIBE_STYLE-}" in
 				(contains)
@@ -492,6 +506,7 @@ __git_ps1 ()
 	local i=""
 	local s=""
 	local u=""
+	local h=""
 	local c=""
 	local p=""
 
@@ -524,6 +539,11 @@ __git_ps1 ()
 			u="%${ZSH_VERSION+%}"
 		fi
 
+		if [ -n "${GIT_PS1_COMPRESSSPARSESTATE}" ] &&
+		   [ "$(git config --bool core.sparseCheckout)" = "true" ]; then
+			h="?"
+		fi
+
 		if [ -n "${GIT_PS1_SHOWUPSTREAM-}" ]; then
 			__git_ps1_show_upstream
 		fi
@@ -538,13 +558,15 @@ __git_ps1 ()
 
 	b=${b##refs/heads/}
 	if [ $pcmode = yes ] && [ $ps1_expanded = yes ]; then
+		# shellcheck disable=SC2034
 		__git_ps1_branch_name=$b
 		b="\${__git_ps1_branch_name}"
 	fi
 
-	local f="$w$i$s$u"
-	local gitstring="$c$b${f:+$z$f}$r$p"
+	local f="$h$w$i$s$u"
+	local gitstring="$c$b${f:+$z$f}${sparse}$r$p"
 
+	# shellcheck disable=SC2059
 	if [ $pcmode = yes ]; then
 		if [ "${__git_printf_supports_v-}" != yes ]; then
 			gitstring=$(printf -- "$printf_format" "$gitstring")
